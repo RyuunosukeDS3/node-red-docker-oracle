@@ -1,3 +1,11 @@
+# CLONED FROM OFFICIAL NODE-RED DOCKER PROJECT AND EDITED WITH Shrinidhikulkarni7/OracleClient_Alpine
+
+Links:
+
+https://github.com/Shrinidhikulkarni7/OracleClient_Alpine
+
+https://github.com/node-red/node-red-docker
+
 # Build your own Docker image
 
 The docker-custom directory contains files you need to build your own images.
@@ -13,7 +21,7 @@ git clone https://github.com/ryuunosukeds3/node-red-docker-oracle
 
 Change dir to docker-custom
 ```shell script
-cd node-red-docker/docker-custom
+cd /node-red-docker-oracle
 ```
 
 ## 1. **package.json**
@@ -65,5 +73,5 @@ $ docker inspect testing:node-red-build
 ## 5. **Advanced Configuration**
 
 The relevant `Dockerfile` can be modified as required.
-
 Uncomment change the NLS_LANG with your database NLS_LANG default is American_America.WE8ISO8859P1
+Change the version from oracle instant client on the docker file as needed.
