@@ -81,3 +81,7 @@ The relevant `Dockerfile` can be modified as required.
 Uncomment and change the NLS_LANG with your database NLS_LANG default is American_America.WE8ISO8859P1
 
 Change the version from oracle instant client on the docker file as needed.
+
+
+
+The instant client library location is located on `lib`
