@@ -8,18 +8,18 @@ https://github.com/node-red/node-red-docker
 
 # Build your own Docker image
 
-The docker-custom directory contains files you need to build your own images.
+The node-red-docker-oracle directory contains files you need to build your own images.
 
 The follow steps describe in short which steps to take to build your own images.
 
 ## 1. git clone
 
-Clone the Node-RED Docker project from github
+Clone the node-red-docker-oracle project from github
 ```shell script
 git clone https://github.com/ryuunosukeds3/node-red-docker-oracle
 ```
 
-Change dir to docker-custom
+Change dir to node-red-docker-oracle
 ```shell script
 cd /node-red-docker-oracle
 ```
@@ -35,7 +35,7 @@ cd /node-red-docker-oracle
 
 ## 3. **docker-alpine.sh**
 
-The `docker-alpine.sh` and `docker-debian.sh` are helper scripts to build a custom Node-RED docker image. The docker-alpine script is based on Alpine as per the default docker package.
+The `docker-alpine.sh` is a helper scripts to build a custom Node-RED docker image. The docker-alpine script is based on Alpine as per the default docker package.
 
 Change the build arguments as needed:
 
@@ -48,9 +48,9 @@ Change the build arguments as needed:
    - `--file Dockerfile.custom` : Dockerfile to use to build your image.
    - `--tag testing:node-red-build` : set the image name and tag
 
-## 4. **Run docker-alpine.sh** or **docker-debian.sh**
+## 4. **Run docker-alpine.sh**
 
-Run `docker-alpine.sh` or `docker-debian.sh`
+Run `docker-alpine.sh`
 
 ```shell script
 $ ./docker-alpine.sh
@@ -61,13 +61,13 @@ This starts building your custom image and might take a while depending on the s
 When building is done you can run the custom image by the following command:
 
 ```shell script
-$ docker run -it -p1880:1880 -v node_red_data:/data --name myNRtest testing:node-red-build
+$ docker run -it -p1880:1880 -v node_red_data:/data --name myNRtest node-red-docker-oracle:latest
 ```
 
 With the following command you can verify your docker image:
 
 ```shell script
-$ docker inspect testing:node-red-build
+$ docker inspect node-red-docker-oracle:latest
 ```
 
 ## 5. **Advanced Configuration**
