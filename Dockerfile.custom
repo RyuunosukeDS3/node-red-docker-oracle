@@ -1,0 +1,114 @@
+ARG ARCH=amd64
+ARG NODE_VERSION=12
+ARG OS=alpine
+
+#### Stage BASE ########################################################################################################
+FROM ${ARCH}/node:${NODE_VERSION}-${OS} AS base
+
+# Copy scripts
+COPY scripts/*.sh /tmp/
+
+# Install tools, create Node-RED app and data dir, add user and set rights
+RUN set -ex && \
+    apk add --no-cache \
+        bash \
+        tzdata \
+        iputils \
+        curl \
+        nano \
+        git \
+        openssl \
+        openssh-client \
+        ca-certificates && \
+    mkdir -p /usr/src/node-red /data && \
+    deluser --remove-home node && \
+    adduser -h /usr/src/node-red -D -H node-red -u 1000 && \
+    chown -R node-red:root /data && chmod -R g+rwX /data && \
+    chown -R node-red:root /usr/src/node-red && chmod -R g+rwX /usr/src/node-red
+    # chown -R node-red:node-red /data && \
+    # chown -R node-red:node-red /usr/src/node-red
+
+# Set work directory
+WORKDIR /usr/src/node-red
+
+# package.json contains Node-RED NPM module and node dependencies
+COPY package.json .
+COPY flows.json /data
+
+#### Stage BUILD #######################################################################################################
+FROM base AS build
+
+# Install Build tools
+RUN apk add --no-cache --virtual buildtools build-base linux-headers udev python && \
+    npm install --unsafe-perm --no-update-notifier --no-fund --only=production && \
+    /tmp/remove_native_gpio.sh && \
+    cp -R node_modules prod_node_modules
+
+#### Stage RELEASE #####################################################################################################
+FROM base AS RELEASE
+ARG BUILD_DATE
+ARG BUILD_VERSION
+ARG BUILD_REF
+ARG NODE_RED_VERSION
+ARG ARCH
+ARG TAG_SUFFIX=default
+
+LABEL org.label-schema.build-date=${BUILD_DATE} \
+    org.label-schema.docker.dockerfile=".docker/Dockerfile.alpine" \
+    org.label-schema.license="Apache-2.0" \
+    org.label-schema.name="Node-RED" \
+    org.label-schema.version=${BUILD_VERSION} \
+    org.label-schema.description="Low-code programming for event-driven applications." \
+    org.label-schema.url="https://nodered.org" \
+    org.label-schema.vcs-ref=${BUILD_REF} \
+    org.label-schema.vcs-type="Git" \
+    org.label-schema.vcs-url="https://github.com/node-red/node-red-docker" \
+    org.label-schema.arch=${ARCH} \
+    authors="Dave Conway-Jones, Nick O'Leary, James Thomas, Raymond Mouthaan"
+
+COPY --from=build /usr/src/node-red/prod_node_modules ./node_modules
+
+# Chown, install devtools & Clean up
+RUN chown -R node-red:root /usr/src/node-red && \
+    /tmp/install_devtools.sh && \
+    rm -r /tmp/*
+
+USER node-red
+
+# Env variables
+ENV NODE_RED_VERSION=$NODE_RED_VERSION \
+    NODE_PATH=/usr/src/node-red/node_modules:/data/node_modules \
+    FLOWS=flows.json
+
+# ENV NODE_RED_ENABLE_SAFE_MODE=true    # Uncomment to enable safe start mode (flows not running)
+# ENV NODE_RED_ENABLE_PROJECTS=true     # Uncomment to enable projects option
+
+# Expose the listening port of node-red
+EXPOSE 1880
+
+# Installing Oracle Instant Client to be able to access oracle db on node-red
+
+# Change user to root to prevent permission denied
+USER root
+
+ENV LD_LIBRARY_PATH=/lib
+
+# Add your database nls_lang to avoid "not a valid month" error.
+# ENV NLS_LANG="American_America.WE8ISO8859P1" # Uncomment to enable, default is American_America.WE8ISO8859P1
+
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/19600/instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
+    unzip instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
+    cp -r instantclient_19_6/* /lib && \
+    rm -rf instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
+    apk add libaio && \
+    apk add libaio libnsl libc6-compat && \
+    cd /lib && \
+    # Linking ld-linux-x86-64.so.2 to the lib/ location (Update accordingly)
+    ln -s /lib64/* /lib && \
+    ln -s libnsl.so.2 /usr/lib/libnsl.so.1 && \
+    ln -s libc.so /usr/lib/libresolv.so.2
+
+# Add a healthcheck (default every 30 secs)
+# HEALTHCHECK CMD curl http://localhost:1880/ || exit 1
+
+ENTRYPOINT ["npm", "start", "--cache", "/data/.npm", "--", "--userDir", "/data"]
