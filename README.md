@@ -84,4 +84,4 @@ Change the version from oracle instant client on the docker file as needed.
 
 
 
-The instant client library location is located on `lib`
+The instant client library location is located on `/lib`
