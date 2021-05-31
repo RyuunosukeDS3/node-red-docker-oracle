@@ -96,10 +96,10 @@ ENV LD_LIBRARY_PATH=/lib
 # Add your database nls_lang to avoid "not a valid month" error.
 # ENV NLS_LANG="American_America.WE8ISO8859P1" # Uncomment to enable, default is American_America.WE8ISO8859P1
 
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/19600/instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
-    unzip instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
-    cp -r instantclient_19_6/* /lib && \
-    rm -rf instantclient-basic-linux.x64-19.6.0.0.0dbru.zip && \
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip && \
+    unzip instantclient-basic-linuxx64 && \
+    cp -r instantclient*/* /lib && \
+    rm -rf instantclient-basic-linuxx64 && \
     apk add libaio && \
     apk add libaio libnsl libc6-compat && \
     cd /lib && \
