@@ -80,7 +80,7 @@ The relevant `Dockerfile` can be modified as required.
 
 Uncomment and change the NLS_LANG with your database NLS_LANG. Default is American_America.WE8ISO8859P1
 
-Change the version from oracle instant client on the docker file as needed.
+Change the version from oracle instant client on the docker file as needed. Default is latest.
 
 
 
